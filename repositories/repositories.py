@@ -1,6 +1,7 @@
 from sqlalchemy import select, and_, func
 from sqlalchemy.orm import joinedload
 
+from models import Manager, Client
 from models.claim import Claim
 from models.invoice import Invoice, Product, Size, PaymentMethod
 from models.user import Client
@@ -58,3 +59,18 @@ class ProductRepository(SQLAlchemyRepository):
 
 class PaymentMethodRepository(SQLAlchemyRepository):
     model = PaymentMethod
+
+
+class ManagerRepository(SQLAlchemyRepository):
+    model = Manager
+
+    async def get_with_minimum_clients(self):
+        query = (
+            select(Manager.id, func.count(Client.id))
+            .join(Client, isouter=True)
+            .group_by(Manager.id)
+            .order_by(func.count(Client.id))
+            .limit(1)
+        )
+        res = await self.session.execute(query)
+        return res.scalars().first()

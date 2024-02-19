@@ -1,5 +1,5 @@
 from database import async_session_maker
-from repositories.manager import ManagerRepository
+from repositories.repositories import ManagerRepository
 from unitofwork import UnitOfWork
 
 

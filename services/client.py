@@ -1,8 +1,7 @@
 from functools import lru_cache
 
 from database import async_session_maker
-from repositories.repositories import ClientRepository
-from repositories.manager import ManagerRepository
+from repositories.repositories import ClientRepository, ManagerRepository
 from schemas import ClientSchema
 from unitofwork import UnitOfWork
 
@@ -20,11 +19,11 @@ class ClientService:
 
     async def add_client(self, client_id: int, client_username: str):
         async with self.uow:
-            manager = await self.uow.manager.get_with_minimum_clients()
+            manager_id = await self.uow.manager.get_with_minimum_clients()
             data = dict(
                 id=client_id,
                 username=client_username,
-                manager_id=manager.id
+                manager_id=manager_id
             )
             await self.uow.client.add_one(data)
             await self.uow.commit()
